@@ -22,6 +22,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Inject subdomain
+        run: |
+          (Get-Content main.py) -replace 'SCHOOL_SUBDOMAIN_PLACEHOLDER', '${{ secrets.SCHOOL_SUBDOMAIN }}' | Set-Content main.py
+        shell: powershell
+
       - name: Build one-file executable
         run: >
           pyinstaller

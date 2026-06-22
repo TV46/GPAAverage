@@ -12,7 +12,7 @@ from urllib3.util.retry import Retry
 
 
 # Academic group IDs to query (13–19 map to school year groups)
-SCHOOL_SUBDOMAIN = "***REMOVED***"
+SCHOOL_SUBDOMAIN = "SCHOOL_SUBDOMAIN_PLACEHOLDER"
 YEARS = range(13, 20)
 
 
