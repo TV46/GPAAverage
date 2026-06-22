@@ -27,6 +27,10 @@ jobs:
           (Get-Content main.py) -replace 'SCHOOL_SUBDOMAIN_PLACEHOLDER', '${{ secrets.SCHOOL_SUBDOMAIN }}' | Set-Content main.py
         shell: powershell
 
+      - name: Debug subdomain
+        run: Select-String -Path main.py -Pattern "SCHOOL_SUBDOMAIN"
+        shell: powershell
+
       - name: Build one-file executable
         run: >
           pyinstaller
