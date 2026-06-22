@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
           cache: pip
 
       - name: Install dependencies
@@ -26,13 +26,11 @@ jobs:
         run: >
           pyinstaller
           --onefile
-          --name GPAAverage
-          --clean
           main.py
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: GPAAverage
-          path: dist/GPAAverage.exe
+          path: dist/main.exe
           retention-days: 30
