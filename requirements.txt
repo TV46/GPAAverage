@@ -2,3 +2,4 @@ pyinstaller
 requests
 compasspy
 urllib3
+pydantic

@@ -5,7 +5,6 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from statistics import fmean
-
 import requests
 from compasspy.client import Compass
 from requests.adapters import HTTPAdapter
