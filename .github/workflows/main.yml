@@ -23,12 +23,10 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Inject subdomain
+        env:
+          SCHOOL_SUBDOMAIN: ${{ secrets.SCHOOL_SUBDOMAIN }}
         run: |
-          (Get-Content main.py) -replace 'SCHOOL_SUBDOMAIN_PLACEHOLDER', '${{ secrets.SCHOOL_SUBDOMAIN }}' | Set-Content main.py
-        shell: powershell
-
-      - name: Debug subdomain
-        run: Select-String -Path main.py -Pattern "SCHOOL_SUBDOMAIN"
+          (Get-Content main.py) -replace 'SCHOOL_SUBDOMAIN_PLACEHOLDER', $env:SCHOOL_SUBDOMAIN | Set-Content main.py
         shell: powershell
 
       - name: Build one-file executable
