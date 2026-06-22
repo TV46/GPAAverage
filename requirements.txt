@@ -1,3 +1,4 @@
-requests~=2.34.2
-compasspy~=3.0
-urllib3~=2.7.0
+pyinstaller
+requests
+compasspy
+urllib3

@@ -20,17 +20,19 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install pyinstaller compasspy requests
+        run: pip install -r requirements.txt
 
       - name: Build one-file executable
         run: >
           pyinstaller
           --onefile
+          --name GPAAverage
+          --clean
           main.py
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: GPAAverage
-          path: dist/main.exe
+          path: dist/GPAAverage.exe
           retention-days: 30
