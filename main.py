@@ -6,12 +6,20 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import re
+import sys
 
 SCHOOL_SUBDOMAIN = "***REMOVED***"
 AUTH_COOKIE = input("Input Auth Cookie: ")
 YEARS = range(13, 20)
 client = Compass(SCHOOL_SUBDOMAIN, AUTH_COOKIE)
-client.login()
+
+try:
+    client.login()
+except Exception as e:
+    print(f"Login Authentication failed.\nError: {e}")
+    input("Press enter to exit")
+    sys.exit(1)
+
 user_id = int(client.dt["userId"])
 print(f"Logged in as: {client.user.name} (ID: {user_id})")
 
@@ -26,8 +34,8 @@ retry_strategy = Retry(
 )
 adapter = HTTPAdapter(
     max_retries=retry_strategy,
-    pool_connections=20,
-    pool_maxsize=20
+    pool_connections=10,
+    pool_maxsize=10
 )
 SESSION.mount("https://", adapter)
 
@@ -69,7 +77,6 @@ def fetch_learning_tasks(year):
     if not tasks:
         return None
 
-    tasks = data.get("d", {}).get("data", [])
     subject_scores = {}
     all_scores = []
 
@@ -138,4 +145,4 @@ all_years_scores = [
 ]
 print(f"\nOverall Average: {fmean(all_years_scores):.2f}")
 
-input("Press enter to close")
+input("Press enter to exit")
