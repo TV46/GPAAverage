@@ -62,7 +62,7 @@ python main.py
 
 The tool requires a Compass session cookie to authenticate. To find it:
 
-1. Log in to [***REMOVED***.compass.education](https://***REMOVED***.compass.education) in your browser
+1. Log in to compass in your browser
 2. Open developer tools (`F12`)
 3. Go to **Application** > **Cookies**
 4. Copy the value of the `ASP.NET_SessionId` cookie (or equivalent session cookie)
