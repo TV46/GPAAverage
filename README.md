@@ -1,6 +1,6 @@
 # Compass Learning Task Averages
 
-A command-line tool for St Helena Secondary College that queries the Compass school portal and prints per-subject and per-year score averages across all year groups.
+A command-line tool that queries the Compass school portal and prints per-subject and per-year score averages across all year groups.
 
 ---
 
@@ -44,10 +44,10 @@ Overall Average: 73.14
 
 ### Option 1 — Download the pre-built executable (recommended)
 
-1. Go to the **Actions** tab in this repository
-2. Open the latest successful **Build Executable** workflow run
-3. Download the `compass_tasks` artifact
-4. Run `compass_tasks.exe`
+1. Go to the releases section in this repository
+2. Open the latest release
+3. Download `GPAAverage.exe`
+4. Run `GPAAverage.exe`
 
 ### Option 2 — Run from source
 
@@ -74,16 +74,16 @@ The tool requires a Compass session cookie to authenticate. To find it:
 
 ## Building from source
 
-The GitHub Actions workflow at `.github/workflows/build.yml` automatically compiles a Windows executable on every push to `main`.
+The GitHub Actions workflow at `.github/workflows/build.yml` automatically compiles a Windows executable on every push to `master`.
 
 To build manually:
 
 ```bash
 pip install pyinstaller -r requirements.txt
-pyinstaller --onefile --name compass_tasks --clean main.py
+pyinstaller --onefile --name GPAAverage --clean main.py
 ```
 
-The output will be at `dist/compass_tasks.exe`.
+The output will be at `dist/GPAAverage.exe`.
 
 ---
 
@@ -91,9 +91,11 @@ The output will be at `dist/compass_tasks.exe`.
 
 | Package | Purpose |
 |---|---|
+| `pyinstaller` | Used to compile to exe |
 | `compasspy` | Compass API client and authentication |
 | `requests` | HTTP session management |
 | `urllib3` | Retry logic and connection pooling |
+| `pydantic` | Used for data Processing |
 
 ---
 
