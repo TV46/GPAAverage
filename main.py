@@ -10,8 +10,6 @@ from compasspy.client import Compass
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-
-# Academic group IDs to query (13–19 map to school year groups)
 SCHOOL_SUBDOMAIN = "sthelena-vic"
 YEARS = range(13, 20)
 
@@ -41,6 +39,9 @@ class Spinner:
         self._stop.set()
         self._thread.join()
 
+def pause_exit(code: int = 0) -> None:
+    input("\nPress Enter to exit")
+    sys.exit(code)
 
 def build_session(client: Compass) -> requests.Session:
     session = requests.Session()
@@ -61,12 +62,9 @@ def fetch_learning_tasks(
     session: requests.Session,
     api_endpoint: str,
     user_id: int,
-    year: int,
-) -> tuple[int, dict, list] | None:
-    """
-    Fetch all learning tasks for a given academic group year.
-    Returns (year, subject_scores, all_scores) or None on failure.
-    """
+    group_id: int,
+    ) -> tuple[int, dict, list] | None:
+
     payload = {
         "sessionstate": "readonly",
         "userId": user_id,
@@ -75,37 +73,30 @@ def fetch_learning_tasks(
         "page": 1,
         "start": 0,
         "limit": 999,
-        "academicGroupId": year,
+        "academicGroupId": group_id,
     }
 
-    response = None
-    for attempt in range(3):
-        try:
-            response = session.post(
-                api_endpoint + "LearningTasks.svc/GetAllLearningTasksByUserId",
-                json=payload,
-                timeout=(15, 30),
-            )
-            break
-        except requests.exceptions.Timeout:
-            wait = 2 ** attempt
-            if attempt < 2:
-                print(f"\nYear {year}: timeout on attempt {attempt + 1}, retrying in {wait}s...")
-                time.sleep(wait)
-            else:
-                print(f"\nYear {year}: timed out after 3 attempts, skipping.")
+    try:
+        response = session.post(
+            api_endpoint + "LearningTasks.svc/GetAllLearningTasksByUserId",
+            json=payload,
+            timeout=(15, 30),
+        )
+    except requests.exceptions.Timeout:
+        print(f"\nTimed out, skipping year.")
+        return None
 
     if response is None:
         return None
 
     if not response.ok:
-        print(f"\nYear {year}: HTTP {response.status_code}, skipping.")
+        print(f"\nHTTP {response.status_code}, skipping year.")
         return None
 
     try:
         data = response.json()
     except ValueError:
-        print(f"\nYear {year}: invalid JSON response, skipping.")
+        print(f"\nInvalid JSON response, skipping year.")
         return None
 
     tasks = data.get("d", {}).get("data", [])
@@ -126,20 +117,14 @@ def fetch_learning_tasks(
                 subject_scores.setdefault(subject, []).append(score)
                 all_scores.append(score)
 
-    return year, subject_scores, all_scores
+    return group_id, subject_scores, all_scores
 
 
 def clean_subject_code(subject: str) -> str:
-    """Strip leading zeros from subject codes, e.g. '07ECL' -> '7ECL'."""
     return re.sub(r"^0+", "", subject)
 
 
 def infer_display_year(subject_scores: dict) -> int | None:
-    """
-    Try to infer the school year number from the first subject code.
-    e.g. '07ECL' -> 7, '10MAT' -> 10.
-    Falls back to None if no match.
-    """
     if not subject_scores:
         return None
     match = re.match(r"^0*(\d+)", next(iter(subject_scores)))
@@ -168,8 +153,7 @@ def main() -> None:
             client.login()
     except Exception as e:
         print(f"Login authentication failed.\nError: \033[31m{e}\033[0m")
-        input("\nPress enter to exit")
-        sys.exit(1)
+        pause_exit(1)
 
     user_id = int(client.dt["userId"])
     print(f"Logged in as: {client.user.name} (ID: {user_id})")
@@ -204,7 +188,7 @@ def main() -> None:
     if all_scores_flat:
         print(f"\nOverall Average: {fmean(all_scores_flat):.2f}")
 
-    input("\nPress enter to exit")
+    pause_exit(0)
 
 
 if __name__ == "__main__":
