@@ -3,3 +3,4 @@ requests
 compasspy
 urllib3
 pydantic
+keyring

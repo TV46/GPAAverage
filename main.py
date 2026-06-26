@@ -5,14 +5,18 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from statistics import fmean
+from typing import NoReturn
+
 import requests
-from compasspy.client import Compass
+from compasspy import Compass
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+import keyring
 
 SCHOOL_SUBDOMAIN = "sthelena-vic"
 YEARS = range(13, 20)
-
+APP_NAME = "GPAAverage"
+COOKIE_KEY = "auth_cookie"
 
 class Spinner:
     def __init__(self, text="Loading"):
@@ -39,7 +43,42 @@ class Spinner:
         self._stop.set()
         self._thread.join()
 
-def pause_exit(code: int = 0) -> None:
+
+def load_cookie() -> str | None:
+    return keyring.get_password(APP_NAME, COOKIE_KEY)
+
+def save_cookie(cookie: str) -> None:
+    keyring.set_password(APP_NAME, COOKIE_KEY, cookie)
+
+def authenticate(subdomain: str) -> Compass:
+    cookie = load_cookie()
+
+    if not cookie:
+        cookie = input("Input Auth Cookie: ").strip()
+    client = Compass(subdomain, cookie)
+    # noinspection PyBroadException
+    try:
+        with Spinner("Authenticating"):
+            client.login()
+        save_cookie(cookie)
+        return client
+    except Exception:
+        print(f"Cookie '\033[3m{cookie}\033[0m' invalid.")
+        cookie = input("Input Auth Cookie: ").strip()
+        client = Compass(subdomain, cookie)
+        try:
+            with Spinner("Authenticating"):
+                client.login()
+            save_cookie(cookie)
+            return client
+        except Exception as e:
+            print(f"Authentication failed: \033[31m{e}\033[0m")
+            pause_exit(1)
+
+
+
+
+def pause_exit(code: int = 0) -> NoReturn:
     input("\nPress Enter to exit")
     sys.exit(code)
 
@@ -145,15 +184,7 @@ def print_year_results(year: int, subject_scores: dict, all_scores: list) -> Non
 
 
 def main() -> None:
-    auth_cookie = input("Input Auth Cookie: ")
-    client = Compass(SCHOOL_SUBDOMAIN, auth_cookie)
-
-    try:
-        with Spinner("Authenticating"):
-            client.login()
-    except Exception as e:
-        print(f"Login authentication failed.\nError: \033[31m{e}\033[0m")
-        pause_exit(1)
+    client = authenticate(SCHOOL_SUBDOMAIN)
 
     user_id = int(client.dt["userId"])
     print(f"Logged in as: {client.user.name} (ID: {user_id})")
